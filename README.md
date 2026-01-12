@@ -4,7 +4,7 @@
 The goal of this challenge is to demonstrate your proficiency in **C++17 (or newer)**, the **Qt Framework**, and **OpenCV**. You will build a desktop application that allows a user to perform "Chroma-Keying" (green-screen replacement) on a video file in real-time.
 
 ## The Problem Statement
-Create a "Virtual Background" application that replaces a specific color in a video stream with the contents of a still background image.
+Create a "Virtual Background" application that replaces a specific color in a video stream with the contents of a still background image. This task is a proxy for how you solve problems in our codebase. Refrain from the use of LLMs for this task, as we are evaluating your personal familiarity with the tools.
 
 ---
 
@@ -22,6 +22,7 @@ Create a "Virtual Background" application that replaces a specific color in a vi
 * **Language:** C++17 or higher.
 * **Threading:** The UI thread **must** remain responsive (non-blocking). Processing logic must run on a dedicated worker thread.
 * **Memory Management:** Avoid unnecessary deep copies of image buffers every frame. Demonstrate proper use of RAII and QObject parent-child ownership.
+* **Note on AI Tools:** You are welcome to use standard documentation and libraries. However, if you use generative AI (ChatGPT, Claude, etc.) to produce the solution, be aware that the subsequent technical interview will focus exclusively on the low-level "why" of your implementation. You will be expected to explain memory ownership, thread synchronization primitives, and OpenCV buffer management in extreme detail. If you cannot explain a line of code, it will be considered a failure of the task.
 
 ---
 
