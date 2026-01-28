@@ -60,7 +60,7 @@ We recommend using `vcpkg` to manage dependencies to avoid pathing issues.
 # 1. Install dependencies
 git clone https://github.com/Microsoft/vcpkg.git
 .\vcpkg\bootstrap-vcpkg.bat
-.\vcpkg\vcpkg install qt6:x64-windows opencv:x64-windows
+.\vcpkg\vcpkg install qt5:x64-windows opencv:x64-windows
 
 # 2. Configure using the vcpkg toolchain
 mkdir build
