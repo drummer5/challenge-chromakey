@@ -3,10 +3,9 @@
 
 int main(int argc, char* argv[])
 {
-    // Initialize the Qt application
+    // Initialize the app
     QApplication app(argc, argv);
 
-    // Create the mainWindow object
     MainWindow mainWindow;
 
     // Show the mainWindow and start the event loop

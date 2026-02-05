@@ -8,7 +8,7 @@
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
-    setWindowTitle("My Virtual Chromakey Application");
+    setWindowTitle("Virtual Background");
     resize(1000, 1000);
     setupUi();
 }
@@ -25,8 +25,6 @@ void MainWindow::setupUi()
     // Create central widget + layout
     vbWidget = new VideoProcessor(this);
     setCentralWidget(vbWidget);
-    //QWidget* centralWidget = new QWidget(this);
-    //setCentralWidget(centralWidget);
 
     QVBoxLayout* layout = new QVBoxLayout(vbWidget);
     layout->setContentsMargins(40, 40, 40, 40);
@@ -71,7 +69,7 @@ void MainWindow::createActions()
 
 void MainWindow::createMenus()
 {
-    fileMenu = menuBar()->addMenu(tr("&Files"));
+    fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(onBrowseForMP4);
     fileMenu->addAction(onBrowseForPNG);
     fileMenu->addSeparator();
@@ -120,36 +118,10 @@ void MainWindow::on_menuBrowseForPNG_clicked()
             QMessageBox::warning(this, "Error", "Could not open file");
         }
     }
+    setWindowTitle(m_PngFile);
     // QMessageBox::information(this, "File Opened", "Selected:\n" + fileName);
-
-    vbWidget->startProcessing();
 }
 
-/*
-// In mainwindow.cpp constructor (example)
-VideoProcessor *vbWidget = new VideoProcessor(this);
-setCentralWidget(vbWidget);
-
-// In your onOpenFile slots (adapt as needed)
-void MainWindow::onOpenMP4() {
-    QString mp4Path = QFileDialog::getOpenFileName(this, "Open MP4 Video", "", "MP4 Files (*.mp4)");
-    if (!mp4Path.isEmpty()) {
-        vbWidget->loadVideo(mp4Path);
-    }
-}
-
-void MainWindow::onOpenPNG() {
-    QString pngPath = QFileDialog::getOpenFileName(this, "Open PNG Background", "", "PNG Files (*.png)");
-    if (!pngPath.isEmpty()) {
-        vbWidget->loadBackground(pngPath);
-    }
-}
-
-// Add a menu item or button to start
-void MainWindow::onStartProcessing() {
-    vbWidget->startProcessing();
-}
-*/
 
 void MainWindow::onQuit()
 {

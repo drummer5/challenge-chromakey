@@ -1,5 +1,6 @@
 ﻿#include "VideoProcessor.hpp"
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QDebug>
 
 
@@ -13,45 +14,63 @@ VideoProcessor::VideoProcessor(QWidget* parent) : QWidget(parent)
     m_displayLabel->setScaledContents(true);  // Scale pixmap to label size
     layout->addWidget(m_displayLabel);
 
+    // Control bar
+    QWidget* controlBar = new QWidget(this);
+    QHBoxLayout* controlLayout = new QHBoxLayout(controlBar);
+    controlLayout->setContentsMargins(10, 8, 10, 8);
+    controlLayout->setSpacing(8);
+
+    m_btnPlay = new QPushButton("Play", this);
+    m_btnPause = new QPushButton("Pause", this);
+    m_btnRestart = new QPushButton("Restart", this);
+
+    m_btnPlay->setFixedWidth(90);
+    m_btnPause->setFixedWidth(90);
+    m_btnRestart->setFixedWidth(90);
+
+    controlLayout->addStretch();
+    controlLayout->addWidget(m_btnPlay);
+    controlLayout->addWidget(m_btnPause);
+    controlLayout->addWidget(m_btnRestart);
+    controlLayout->addStretch();
+
+    layout->addWidget(controlBar);
+
     m_timer = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, &VideoProcessor::processFrame);
+
+    // Button connections
+    connect(m_btnPlay, &QPushButton::clicked, this, &VideoProcessor::play);
+    connect(m_btnPause, &QPushButton::clicked, this, &VideoProcessor::pause);
+    connect(m_btnRestart, &QPushButton::clicked, this, &VideoProcessor::restart);
+
+    // Initial state
+    m_btnPause->setEnabled(false);
 }
 
 VideoProcessor::~VideoProcessor()
 {
     m_timer->stop();
 
-    if (m_cap.isOpened()) {
-        m_cap.release();
+    if (m_vidCapture.isOpened()) {
+        m_vidCapture.release();
     }
 }
 
-
-void VideoProcessor::startProcessing()
-{
-    if (!m_cap.isOpened() || m_background.empty()) {
-        qDebug() << "Video or background not loaded";
-        return;
-    }
-
-    // Set timer interval based on video FPS (or default 30ms ~33fps)
-    double fps = m_cap.get(cv::CAP_PROP_FPS);
-    int interval = (fps > 0) ? static_cast<int>(1000 / fps) : 30;
-    m_timer->start(interval);
-}
 
 void VideoProcessor::processFrame()
 {
-    if (!m_cap.isOpened()) return;
+    if (!m_vidCapture.isOpened()) return;
 
     cv::Mat frame;
-    m_cap >> frame;
+    m_vidCapture >> frame;
     if (frame.empty()) {
         // Loop the video
-        m_cap.set(cv::CAP_PROP_POS_FRAMES, 0);
-        m_cap >> frame;
+        m_vidCapture.set(cv::CAP_PROP_POS_FRAMES, 0);
+        m_vidCapture >> frame;
         if (frame.empty()) {
-            m_timer->stop();
+            // m_timer->stop();
+            pause();
             return;
         }
     }
@@ -93,8 +112,8 @@ void VideoProcessor::processFrame()
 
 bool VideoProcessor::loadVideo(const QString& mp4Path)
 {
-    m_cap.open(mp4Path.toStdString());
-    if (!m_cap.isOpened()) {
+    m_vidCapture.open(mp4Path.toStdString());
+    if (!m_vidCapture.isOpened()) {
         qDebug() << "Failed to open video:" << mp4Path;
         return false;
     }
@@ -108,5 +127,47 @@ bool VideoProcessor::loadBackground(const QString& pngPath)
         qDebug() << "Failed to load background:" << pngPath;
         return false;
     }
+
+    // Reset
+    m_isPlaying = false;
+    m_timer->stop();
+    m_btnPlay->setEnabled(true);
+    m_btnPause->setEnabled(false);
+
     return true;
+}
+
+
+void VideoProcessor::play()
+{
+    if (!m_vidCapture.isOpened()) return;
+
+    if (!m_isPlaying) {
+        double fps = m_vidCapture.get(cv::CAP_PROP_FPS);
+        int interval = (fps > 0) ? static_cast<int>(1000.0 / fps) : 33;
+
+        m_timer->start(interval);
+        m_isPlaying = true;
+
+        m_btnPlay->setEnabled(false);
+        m_btnPause->setEnabled(true);
+    }
+}
+
+void VideoProcessor::pause()
+{
+    m_timer->stop();
+    m_isPlaying = false;
+
+    m_btnPlay->setEnabled(true);
+    m_btnPause->setEnabled(false);
+}
+
+void VideoProcessor::restart()
+{
+    if (!m_vidCapture.isOpened()) return;
+
+    m_vidCapture.set(cv::CAP_PROP_POS_FRAMES, 0);
+    pause();               // stop if was playing
+    play();                // immediately start again
 }

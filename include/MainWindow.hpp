@@ -32,7 +32,7 @@ private:
     void createMenus();
 
     VideoProcessor* vbWidget;
-    QLabel* centralLabel;
+
     QAction* onBrowseForMP4 = nullptr;
     QAction* onBrowseForPNG = nullptr;
     QAction* quitApp = nullptr;
