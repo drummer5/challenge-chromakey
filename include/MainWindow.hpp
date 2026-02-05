@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "VideoProcessor.hpp"
+
 #include <QApplication> // for qApp->quit();
 #include <QMainWindow>
 #include <QAction>
@@ -29,13 +31,16 @@ private:
     void createActions();
     void createMenus();
 
+    VideoProcessor* vbWidget;
     QLabel* centralLabel;
     QAction* onBrowseForMP4 = nullptr;
     QAction* onBrowseForPNG = nullptr;
     QAction* quitApp = nullptr;
     QMenu* fileMenu = nullptr;
 
-    QString m_lastOpenedFile = QApplication::applicationDirPath();
+    // start browsing for files from application directory
+    QString m_MP4File = QApplication::applicationDirPath();
+    QString m_PngFile = QApplication::applicationDirPath();
 };
 
 #endif // MAINWINDOW_H

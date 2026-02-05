@@ -1,4 +1,5 @@
 ﻿#include "MainWindow.hpp"
+#include "VideoProcessor.hpp"
 #include <QVBoxLayout>
 #include <QWidget>
 #include <QFileDialog>
@@ -22,26 +23,28 @@ void MainWindow::setupUi()
     createMenus();
 
     // Create central widget + layout
-    QWidget* centralWidget = new QWidget(this);
-    setCentralWidget(centralWidget);
+    vbWidget = new VideoProcessor(this);
+    setCentralWidget(vbWidget);
+    //QWidget* centralWidget = new QWidget(this);
+    //setCentralWidget(centralWidget);
 
-    QVBoxLayout* layout = new QVBoxLayout(centralWidget);
+    QVBoxLayout* layout = new QVBoxLayout(vbWidget);
     layout->setContentsMargins(40, 40, 40, 40);
     layout->setSpacing(20);
 
     // Example content
-    centralLabel = new QLabel("My Virtual Chromakey Application", centralWidget);
-    centralLabel->setAlignment(Qt::AlignCenter);
-    centralLabel->setStyleSheet(
-        "font-size: 36px;"
-        "font-weight: bold;"
-        "color: #1e40af;"
-        "background-color: #f3f4f6;"
-        "padding: 20px;"
-        "border-radius: 12px;"
-    );
+    //centralLabel = new QLabel("My Virtual Chromakey Application", centralWidget);
+    //centralLabel->setAlignment(Qt::AlignCenter);
+    //centralLabel->setStyleSheet(
+    //    "font-size: 36px;"
+    //    "font-weight: bold;"
+    //    "color: #1e40af;"
+    //    "background-color: #f3f4f6;"
+    //    "padding: 20px;"
+    //    "border-radius: 12px;"
+    //);
 
-    layout->addWidget(centralLabel);
+    //layout->addWidget(centralLabel);
 
     // statusBar()->showMessage("Ready", 5000);
 }
@@ -81,34 +84,20 @@ void MainWindow::on_menuBrowseForMP4_clicked()
     QString fileName = QFileDialog::getOpenFileName(
         this,                                   // parent widget
         tr("Open .mp4 File"),                   // title
-        m_lastOpenedFile.isEmpty() ? QDir::homePath() : QFileInfo(m_lastOpenedFile).absolutePath(),  // start here
+        m_MP4File.isEmpty() ? QDir::homePath() : QFileInfo(m_MP4File).absolutePath(),  // start here
         tr("mp4 Files (*.mp4);;All Files (*)")
     );
 
-    if (fileName.isEmpty()) {
-        // User canceled → do nothing
-        return;
+    if (!(fileName.isEmpty()))
+    {
+        m_MP4File = fileName;
+        qDebug() << "Selected file:" << fileName;
+
+        if (vbWidget->loadVideo(m_MP4File) == false)
+        {
+            QMessageBox::warning(this, "Error", "Could not open file");
+        }
     }
-
-    // Remember for next time (optional but user-friendly)
-    m_lastOpenedFile = fileName;
-
-    // Now do something with the file (examples):
-    qDebug() << "Selected file:" << fileName;
-
-    // Option 1: Show a message
-    // QMessageBox::information(this, "File Opened", "Selected:\n" + fileName);
-
-    // Option 2: Load/read the file contents (example)
-    // QFile file(fileName);
-    // if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    //     QTextStream in(&file);
-    //     QString content = in.readAll();
-    //     // e.g. put into a QTextEdit if you have one: ui->textEdit->setPlainText(content);
-    //     file.close();
-    // } else {
-    //     QMessageBox::warning(this, "Error", "Could not open file");
-    // }
 }
 
 
@@ -116,58 +105,51 @@ void MainWindow::on_menuBrowseForPNG_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(
         this,                                   // parent widget
-        tr("Open File"),                        // title
-        m_lastOpenedFile.isEmpty() ? QDir::homePath() : QFileInfo(m_lastOpenedFile).absolutePath(),  // start here
+        tr("Open .png File"),                   // title
+        m_PngFile.isEmpty() ? QDir::homePath() : QFileInfo(m_PngFile).absolutePath(),
         tr("png Files (*.png);;All Files (*)")
     );
 
-    if (fileName.isEmpty()) {
-        // User canceled → do nothing
-        return;
+    if (!(fileName.isEmpty()))
+    {
+        m_PngFile = fileName;
+        qDebug() << "Selected file:" << fileName;
+
+        if (vbWidget->loadBackground(m_PngFile) == false)
+        {
+            QMessageBox::warning(this, "Error", "Could not open file");
+        }
     }
-
-    // Remember for next time (optional but user-friendly)
-    m_lastOpenedFile = fileName;
-
-    // Now do something with the file (examples):
-    qDebug() << "Selected file:" << fileName;
-
-    // Option 1: Show a message
     // QMessageBox::information(this, "File Opened", "Selected:\n" + fileName);
 
-    // Option 2: Load/read the file contents (example)
-    // QFile file(fileName);
-    // if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    //     QTextStream in(&file);
-    //     QString content = in.readAll();
-    //     // e.g. put into a QTextEdit if you have one: ui->textEdit->setPlainText(content);
-    //     file.close();
-    // } else {
-    //     QMessageBox::warning(this, "Error", "Could not open file");
-    // }
-
+    vbWidget->startProcessing();
+}
 
 /*
-QString fileName = QFileDialog::getOpenFileName(
-    this,                                   // parent
-    tr("Open Document"),                    // title
-    QDir::homePath(),                       // starting directory
-    tr("Text Files (*.txt *.md *.csv);;All Files (*)")   // filter
-);
+// In mainwindow.cpp constructor (example)
+VideoProcessor *vbWidget = new VideoProcessor(this);
+setCentralWidget(vbWidget);
 
-if (fileName.isEmpty()) {
-    return;  // user canceled
+// In your onOpenFile slots (adapt as needed)
+void MainWindow::onOpenMP4() {
+    QString mp4Path = QFileDialog::getOpenFileName(this, "Open MP4 Video", "", "MP4 Files (*.mp4)");
+    if (!mp4Path.isEmpty()) {
+        vbWidget->loadVideo(mp4Path);
+    }
 }
 
-m_currentFilePath = fileName;
-ui->lineEditFilePath->setText(fileName);
+void MainWindow::onOpenPNG() {
+    QString pngPath = QFileDialog::getOpenFileName(this, "Open PNG Background", "", "PNG Files (*.png)");
+    if (!pngPath.isEmpty()) {
+        vbWidget->loadBackground(pngPath);
+    }
+}
 
-// Optional: show message or load the file
-// QMessageBox::information(this, "Selected", "File: " + fileName);
-// QFile file(fileName); if (file.open(...)) { ... }
+// Add a menu item or button to start
+void MainWindow::onStartProcessing() {
+    vbWidget->startProcessing();
+}
 */
-}
-
 
 void MainWindow::onQuit()
 {
