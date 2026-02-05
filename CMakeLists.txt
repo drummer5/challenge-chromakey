@@ -9,8 +9,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-# 1. Find Qt6
-find_package(Qt6 REQUIRED COMPONENTS Widgets Core Gui)
+# 1. Find Qt5
+find_package(Qt5 REQUIRED COMPONENTS Widgets Core Gui)
 
 # 2. Find OpenCV
 find_package(OpenCV REQUIRED)
@@ -26,7 +26,7 @@ add_executable(${PROJECT_NAME}
 
 # 4. Link Libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    Qt6::Widgets
+    Qt5::Widgets
     ${OpenCV_LIBS}
 )
 
