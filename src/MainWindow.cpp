@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
     setWindowTitle("Virtual Background");
     resize(1000, 1000);
+    statusBar()->showMessage("Load an MP4 and PNG background to start", 9000);
     setupUi();
 }
 
@@ -19,37 +20,22 @@ MainWindow::~MainWindow()
 
 void MainWindow::setupUi()
 {
+    // setup and connect signals/slots
     createActions();
     createMenus();
 
     // Create central widget + layout
     vbWidget = new VideoProcessor(this);
     setCentralWidget(vbWidget);
-
     QVBoxLayout* layout = new QVBoxLayout(vbWidget);
     layout->setContentsMargins(40, 40, 40, 40);
     layout->setSpacing(20);
-
-    // Example content
-    //centralLabel = new QLabel("My Virtual Chromakey Application", centralWidget);
-    //centralLabel->setAlignment(Qt::AlignCenter);
-    //centralLabel->setStyleSheet(
-    //    "font-size: 36px;"
-    //    "font-weight: bold;"
-    //    "color: #1e40af;"
-    //    "background-color: #f3f4f6;"
-    //    "padding: 20px;"
-    //    "border-radius: 12px;"
-    //);
-
-    //layout->addWidget(centralLabel);
-
-    // statusBar()->showMessage("Ready", 5000);
 }
 
 
 void MainWindow::createActions()
 {
+    // define all menu items
     onBrowseForMP4 = new QAction(tr("&Load .mp4 File"), this);
     onBrowseForMP4->setShortcut(tr("Ctrl+O"));
     onBrowseForMP4->setStatusTip(tr("Load .mp4 File"));
@@ -79,6 +65,7 @@ void MainWindow::createMenus()
 
 void MainWindow::on_menuBrowseForMP4_clicked()
 {
+    // slot for loading .mp4 video file
     QString fileName = QFileDialog::getOpenFileName(
         this,                                   // parent widget
         tr("Open .mp4 File"),                   // title
@@ -101,6 +88,7 @@ void MainWindow::on_menuBrowseForMP4_clicked()
 
 void MainWindow::on_menuBrowseForPNG_clicked()
 {
+    // slot for loading .png background file
     QString fileName = QFileDialog::getOpenFileName(
         this,                                   // parent widget
         tr("Open .png File"),                   // title
@@ -118,13 +106,14 @@ void MainWindow::on_menuBrowseForPNG_clicked()
             QMessageBox::warning(this, "Error", "Could not open file");
         }
     }
+    // show User the path + name of the current background file
     setWindowTitle(m_PngFile);
-    // QMessageBox::information(this, "File Opened", "Selected:\n" + fileName);
 }
 
 
 void MainWindow::onQuit()
 {
+    // slot for quitting app
     QMessageBox::StandardButton reply = QMessageBox::question(
         this, "Quit", "Are you sure you want to quit?",
         QMessageBox::Yes | QMessageBox::No);
